@@ -1,3 +1,4 @@
+.
 # Vault group data
 
 
