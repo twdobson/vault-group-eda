@@ -3,6 +3,8 @@ import pickle
 import pandas as pd
 import plotly.express as px
 
+
+
 print('reading in data')
 type_1_df = pd.read_pickle('type_1_df.pkl')
 type_2_df = pd.read_pickle('type_2_df.pkl')

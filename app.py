@@ -20,6 +20,7 @@ with open("samples_type_2.pickle", "rb") as reader:
     samples_type_2 = pickle.load(reader)
 
 app = dash.Dash(__name__)
+server = app.server
 
 app.layout = html.Div(
     [
