@@ -5,6 +5,7 @@ import dash_core_components as dcc
 import dash_html_components as html
 import dash_table
 import pandas as pd
+import plotly.express as px
 from dash.dependencies import Output, Input
 
 with open("graphs.pickle", "rb") as reader:
@@ -19,12 +20,15 @@ with open("graphs_type_2.pickle", "rb") as reader:
 with open("samples_type_2.pickle", "rb") as reader:
     samples_type_2 = pickle.load(reader)
 
+_type_1_duressed_unit_data = pd.read_pickle('type_1_duressed_unit_data.pkl')
+
 app = dash.Dash(__name__)
 server = app.server
 
 app.layout = html.Div(
     [
         html.H1('Vault data exploration'),
+        dcc.Markdown(open('Notes.md').read()),
         html.Hr(),
         html.H2('Data type 1'),
         html.Br(),
@@ -67,6 +71,7 @@ app.layout = html.Div(
         html.Div(
             dash_table.DataTable(
                 id='datatable-samples',
+                style_cell={'textAlign': 'left'},
             )
         ),
         html.Hr(),
@@ -76,6 +81,30 @@ app.layout = html.Div(
             for column
             in graphs
         ],
+        html.Br(),
+        html.Hr(),
+        html.H3('Time series of duressed unit logs'),
+        html.Label(
+            [
+                html.Label(
+                    id='label-select-a-duress-unit',
+                    children=["Select a unit (All units have had duress detected)"]
+                ),
+                dcc.Dropdown(
+                    id='dropdown-select-a-duress-unit',
+                    value=None,
+                    style={'width': 300},
+                    options=[
+                        {'label': unique_value, 'value': unique_value}
+                        for unique_value
+                        in set(_type_1_duressed_unit_data['unit_id'])
+                    ]
+                ),
+            ]
+        ),
+        dcc.Graph(
+            id='graph-time-series-duress-units'
+        ),
         html.Br(),
         html.Hr(),
         # Type 2 starts
@@ -120,6 +149,7 @@ app.layout = html.Div(
         html.Div(
             dash_table.DataTable(
                 id='datatable-samples-type-2',
+                style_cell={'textAlign': 'left'},
             )
         ),
         html.Hr(),
@@ -240,6 +270,28 @@ def filter_samples_type_2(category, value):
             df = df[df[category].isin(value)]
 
         return df.to_dict('records'), [{"name": i, "id": i} for i in df.columns], options
+
+
+@app.callback(
+    Output('graph-time-series-duress-units', 'figure'),
+    Input('dropdown-select-a-duress-unit', 'value')
+)
+def show_duress_timeseries(unit_id):
+    type_1_duressed_unit_data = pd.read_pickle('type_1_duressed_unit_data.pkl')
+
+    unit_records = type_1_duressed_unit_data[type_1_duressed_unit_data['unit_id'] == unit_id]
+
+    fig = px.scatter(
+        unit_records,
+        y="capture_time",
+        x=[1] * unit_records.shape[0],
+        color="facility",
+        text="facility",
+        hover_data=['data'],
+        range_x=[1, 1]
+    )
+
+    return fig
 
 
 if __name__ == '__main__':

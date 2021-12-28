@@ -3,11 +3,18 @@ import pickle
 import pandas as pd
 import plotly.express as px
 
-
-
 print('reading in data')
 type_1_df = pd.read_pickle('type_1_df.pkl')
 type_2_df = pd.read_pickle('type_2_df.pkl')
+
+type_1_df[type_1_df['data'].str.contains("DURESS")].head()
+
+duressed_units = list(set(type_1_df[type_1_df['type']==6000]['unit_id'].unique().tolist()))
+
+type_1_duressed_unit_data = type_1_df[type_1_df['unit_id'].isin(duressed_units[0:5])]  # cv5712, cv5712, cv6021
+type_1_duressed_unit_data.to_pickle('type_1_duressed_unit_data.pkl')
+
+# fig.update_traces(textposition="bottom right")
 
 print(type_1_df.shape)  # 14734751 = 80%
 print(type_2_df.shape)  # 3671089 = 20%
