@@ -185,14 +185,14 @@ def utilisation_by_week(filtered_df, unit):
     
     return pie_df
 
-locations = pd.read_csv("Site Store Addresses.csv")#Unit 1
-locations.rename({'Unit 1': 'unit_id'}, axis=1, inplace=True)
-print(locations.dtypes)
+# locations = pd.read_csv("Site Store Addresses.csv")#Unit 1
+# locations.rename({'Unit 1': 'unit_id'}, axis=1, inplace=True)
+# print(locations.dtypes)
 
-data_df = pd.read_pickle("type_1_df.pkl")
-data_df["success"] = data_df["success"].astype(object)
-data_df["type"] = data_df["type"].astype(object)
-print(data_df.dtypes)
+# data_df = pd.read_pickle("type_1_df.pkl")
+# data_df["success"] = data_df["success"].astype(object)
+# data_df["type"] = data_df["type"].astype(object)
+# print(data_df.dtypes)
 
 # filtered_df = data_df[data_df["unit_id"] == "cv730"]
 # filtered_df = filtered_df[filtered_df['data'].str.contains("Locker state")]
@@ -200,8 +200,8 @@ print(data_df.dtypes)
 #converted_time = pd.to_datetime(filtered_df["capture_time"])
 #print(converted_time)
 
-data_df.join(locations,on = "unit_id",how = "left")
-print(data_df.columns)
+#data_df.join(locations,on = "unit_id",how = "left")
+#print(data_df.columns)
 
 
 
