@@ -14,8 +14,8 @@ with open('raw_logs.log', 'r') as read:
         evaluation = eval(line.replace('true', 'True'))
         log_data.append(evaluation)
 
-# for l in range(100):
-#     print(log_data[l])
+for l in range(100):
+    print(log_data[l])
 
 print('getting keys for data')
 keys = [l.keys() for l in log_data]
