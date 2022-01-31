@@ -6,6 +6,7 @@ dummy_logs.txt
 .idea
 __pycache__/
 .env
+.DS_Store
 
 data/*
 !/data/
