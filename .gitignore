@@ -5,3 +5,6 @@ cleaned_logs.txt
 dummy_logs.txt
 .idea
 .pycache/
+.env
+data/
+!/data/shape_files/*
