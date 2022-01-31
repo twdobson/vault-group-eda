@@ -4,7 +4,7 @@ raw_logs.log
 cleaned_logs.txt
 dummy_logs.txt
 .idea
-.pycache/
+__pycache__/
 .env
 
 data/*
