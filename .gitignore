@@ -4,3 +4,16 @@ raw_logs.log
 cleaned_logs.txt
 dummy_logs.txt
 .idea
+__pycache__/
+.env
+.DS_Store
+
+data/*
+!/data/
+!/data/assets
+!/data/processed/
+!/data/shape_files/*
+!/data/processed/sites_with_geo_coding.pickle
+!/data/processed/total_keys.pkl
+!/data/assets/Nic_Notes.md
+!/data/assets/Notes.md
