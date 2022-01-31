@@ -6,5 +6,13 @@ dummy_logs.txt
 .idea
 .pycache/
 .env
-data/
+
+data/*
+!/data/
+!/data/assets
+!/data/processed/
 !/data/shape_files/*
+!/data/processed/sites_with_geo_coding.pickle
+!/data/processed/total_keys.pkl
+!/data/assets/Nic_Notes.md
+!/data/assets/Notes.md
