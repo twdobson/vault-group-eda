@@ -9,7 +9,7 @@ import urllib.parse
 import datetime
 
 #pd.options.display.max_rows = 500
-pd.set_option('display.max_rows', 50)
+pd.set_option('display.max_rows', 500)
 pd.set_option("expand_frame_repr", True)
 pd.options.display.float_format = '{:.5f}'.format
 pd.set_option("max_colwidth", None)
@@ -189,7 +189,8 @@ def utilisation_by_week(filtered_df, unit):
 # locations.rename({'Unit 1': 'unit_id'}, axis=1, inplace=True)
 # print(locations.dtypes)
 
-# data_df = pd.read_pickle("type_1_df.pkl")
+#data_df = pd.read_pickle("type_1_df.pkl")
+#print(data_df.columns)
 # data_df["success"] = data_df["success"].astype(object)
 # data_df["type"] = data_df["type"].astype(object)
 # print(data_df.dtypes)
@@ -197,6 +198,7 @@ def utilisation_by_week(filtered_df, unit):
 # filtered_df = data_df[data_df["unit_id"] == "cv730"]
 # filtered_df = filtered_df[filtered_df['data'].str.contains("Locker state")]
 
+# print(filtered_df["data"])
 #converted_time = pd.to_datetime(filtered_df["capture_time"])
 #print(converted_time)
 
@@ -214,61 +216,15 @@ def utilisation_by_week(filtered_df, unit):
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-# def get_location():
-#     GOOGLE_MAPS_API_URL = 'http://maps.googleapis.com/maps/api/geocode/json'
-
-#     params = {
-#         'address': 'Cresta Mall, Gauteng',
-#         'sensor': 'false',
-#         'region': 'South Africa'
-#     }
-#     # Do the request and get the response data
-#     req = requests.get(GOOGLE_MAPS_API_URL, params=params)
-#     res = req.json()
-#     # Use the first result
-#     print(res)
-#     result = res['results'][0]
-#     geodata = dict()
-#     geodata['lat'] = result['geometry']['location']['lat']
-#     geodata['lng'] = result['geometry']['location']['lng']
-#     geodata['address'] = result['formatted_address']
-
-#     print('{address}. (lat, lng) = ({lat}, {lng})'.format(**geodata))
-
-
-# get_location()
-
-
-
-"""Codes:
+"""
+Codes:
 - 0: Unlocked
 - 1: Locked
 - 2: Unused locker 
 
 Slaves start from 0!
 
-11085630    2021-12-10T16:06:54.6Z  Locker state on slave 1 changed from [S]-U-L-L-U-L-L-[E] to [S]-L-L-L-L-L-L-[E]
-11085940   2021-12-10T16:07:26.31Z      Locker state on slave 0 changed from [S]-L-U-L-L-L-[E] to [S]-L-L-L-L-L-[E]
-12592533  2021-12-12T11:00:46.251Z              Locker state on slave 4 changed from [S]-U-L-U-[E] to [S]-L-L-U-[E]
-12592544  2021-12-12T11:00:46.601Z  Locker state on slave 2 changed from [S]-U-L-L-L-L-L-[E] to [S]-L-L-L-L-L-L-[E]
-12656031  2021-12-12T12:31:48.461Z              Locker state on slave 4 changed from [S]-L-L-U-[E] to [S]-L-L-L-[E]
-12656545  2021-12-12T12:31:54.032Z  Locker state on slave 1 changed from [S]-L-L-L-L-U-L-[E] to [S]-L-L-L-L-L-L-[E]
-13830844  2021-12-13T15:55:06.937Z  Locker state on slave 1 changed from [S]-L-L-L-U-L-L-[E] to [S]-L-L-L-L-L-L-[E]
-
 """
 
 
 
-#Will focus on 'Capture Time' - assuming this is the local (on-device) time the event occurred
-#Assume all lockers start out as unlocked first
