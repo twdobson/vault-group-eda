@@ -8,6 +8,7 @@ __pycache__/
 .env
 .DS_Store
 
+./averages
 data/*
 !/data/
 !/data/assets
