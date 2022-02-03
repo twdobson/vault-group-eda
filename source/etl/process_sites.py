@@ -76,62 +76,64 @@ site_list.columns = site_list.columns.str.lower().str.replace(
 
 site_list['vault_id'] = site_list.groupby(['store_name', 'unit_id']).ngroup()
 
-import geopandas as gpd
+site_list.to_pickle('data/processed/dataprocessed_site_data.pkl')
 
-gdf = gpd.read_file('data/shape_files/zaf_admbnda_adm2_sadb_ocha_20201109.shp')
-gdf.plot()
+# import geopandas as gpd
 
-geojsdata = shapefile_to_geojson(gdf, list(gdf.index), geo_names_col='ADM2_EN')
+# gdf = gpd.read_file('data/shape_files/zaf_admbnda_adm2_sadb_ocha_20201109.shp')
+# gdf.plot()
 
-lats = site_list['latitude'].tolist()
-lons = site_list['longitude'].tolist()
-# text = gdf['label'].tolist()
+# geojsdata = shapefile_to_geojson(gdf, list(gdf.index), geo_names_col='ADM2_EN')
 
-bluecart = [
-    [0.0, 'rgb(255, 255, 204)'],
-    [0.35, 'rgb(161, 218, 180)'],
-    [0.5, 'rgb(65, 182, 196)'],
-    [0.6, 'rgb(44, 127, 184)'],
-    [0.7, 'rgb(8, 104, 172)'],
-    [1.0, 'rgb(37, 52, 148)']
-]
+# lats = site_list['latitude'].tolist()
+# lons = site_list['longitude'].tolist()
+# # text = gdf['label'].tolist()
 
-choro = go.Choroplethmapbox(
-    z=gdf['ADM2_EN'].tolist(),
-    locations=gdf.index.tolist(),
-    colorscale=bluecart,  # carto
-    colorbar=dict(thickness=20, ticklen=3),
-    geojson=geojsdata,
-    text=gdf['ADM2_EN'],
-    # below=True,
-    hovertemplate='<b>Province</b>: <b>%{text}</b>' +
-                  '<br><b>Val </b>: %{z}<br>',
-    marker_line_width=0.1,
-    marker_opacity=0.7
-)
-scatt = go.Scattermapbox(
-    lat=lats,
-    lon=lons,
-    mode='markers+text',
-    # text=text,
-    # hoverinfo='none',
-    below='',
-    marker=dict(size=12, color='rgb(235, 0, 100)')
-)
-layout = go.Layout(
-    title_text='Netherlands mapbox choropleth',
-    title_x=0.5,
-    width=750,
-    height=700,
-    mapbox=dict(
-        center=dict(lat=-28, lon=26),
-        accesstoken=Config.mapbox_token,
-        zoom=4,
-        style="light"
+# bluecart = [
+#     [0.0, 'rgb(255, 255, 204)'],
+#     [0.35, 'rgb(161, 218, 180)'],
+#     [0.5, 'rgb(65, 182, 196)'],
+#     [0.6, 'rgb(44, 127, 184)'],
+#     [0.7, 'rgb(8, 104, 172)'],
+#     [1.0, 'rgb(37, 52, 148)']
+# ]
 
-    )
-)
+# choro = go.Choroplethmapbox(
+#     z=gdf['ADM2_EN'].tolist(),
+#     locations=gdf.index.tolist(),
+#     colorscale=bluecart,  # carto
+#     colorbar=dict(thickness=20, ticklen=3),
+#     geojson=geojsdata,
+#     text=gdf['ADM2_EN'],
+#     # below=True,
+#     hovertemplate='<b>Province</b>: <b>%{text}</b>' +
+#                   '<br><b>Val </b>: %{z}<br>',
+#     marker_line_width=0.1,
+#     marker_opacity=0.7
+# )
+# scatt = go.Scattermapbox(
+#     lat=lats,
+#     lon=lons,
+#     mode='markers+text',
+#     # text=text,
+#     # hoverinfo='none',
+#     below='',
+#     marker=dict(size=12, color='rgb(235, 0, 100)')
+# )
+# layout = go.Layout(
+#     title_text='Netherlands mapbox choropleth',
+#     title_x=0.5,
+#     width=750,
+#     height=700,
+#     mapbox=dict(
+#         center=dict(lat=-28, lon=26),
+#         accesstoken=Config.mapbox_token,
+#         zoom=4,
+#         style="light"
 
-fig = go.Figure(data=[choro, scatt], layout=layout)
-pio.renderers.default = "browser"
-fig.show()
+#     )
+# )
+
+# fig = go.Figure(data=[choro, scatt], layout=layout)
+# pio.renderers.default = "browser"
+# fig.show()
