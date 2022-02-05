@@ -1,6 +1,7 @@
 
 from calendar import week
 from pickletools import string1
+from xml.dom.domreg import well_known_implementations
 import pandas as pd
 import numpy as np
 import plotly.express as px
@@ -28,9 +29,7 @@ def num_cols(df):
     return max_cols
 
 def convert_string(string):
-    print(string)
     string_length = len(string)
-    print(string_length)
     #Populates from the top
     if string_length == 9:
         #1 lockers
@@ -47,7 +46,6 @@ def convert_string(string):
 
         if l1 == 'L':
             array_rep[0] = 1
-
     elif string_length == 11:
         #2 lockers
         array_rep = np.zeros(shape = (9,1))
@@ -377,45 +375,35 @@ def create_average_plot_all(unit_list,df):
 def utilisation_by_week(filtered_df, unit):
     converted_time = pd.to_datetime(filtered_df["capture_time"])
     filtered_df["day_of_week"] = converted_time.dt.dayofweek #gives only the index(0-monday,6-sunday)
-    
+
+    mapping_function = {0:"Monday",1:"Tuesday",2:"Wednesday",3:"Thursday",4:"Friday",5:"Saturday",6:"Sunday"}
+
     weekend_df = filtered_df[filtered_df["day_of_week"] >= 5]
     weekend_array, weekend_fig = create_individual_plot(weekend_df,unit)
     weekend_sum = np.sum(weekend_array)
+    weekend_df["day_of_week"].map(mapping_function)
     
+    weekend_numbers = weekend_df["day_of_week"].value_counts()
+    weekend_numbers = pd.DataFrame(weekend_numbers)
+    print(weekend_numbers)
+
     week_df = filtered_df[filtered_df["day_of_week"] < 5]
     week_array, week_fig = create_individual_plot(week_df,unit)
     week_sum = np.sum(week_array)
-    
-    #pie_df = pd.DataFrame(data = {"Week Utilisation":[int(week_sum)],"Weekend Utilisation":[int(weekend_sum)]})
+    week_df["day_of_week"].map(mapping_function)
+
+    week_numbers = week_df["day_of_week"].value_counts()
+    week_numbers = pd.DataFrame(week_numbers)
+    print(week_numbers)
+
     pie_df = pd.DataFrame(data = [["Weekly Utilisation",week_sum],["Weekend Utilisation",weekend_sum]])
     
     return pie_df
 
+# df  = pd.read_pickle("type_1_df_merged.pkl")
+# print(df[['store_name','building', 'shop_number', 'shipping_street', 'shipping_city', 'region']])
 
-
-
-locations = pd.read_pickle("data\\processed\\sites_with_geo_coding.pickle")
-print(locations)
-
-df = pd.read_pickle("type_1_df.pkl")
-
-
-filtered_df = df[df["unit_id"] == "cv730"]
-filtered_df = filtered_df[filtered_df['data'].str.contains("Locker state")]
-
-converted_time = pd.to_datetime(filtered_df["capture_time"])
-print(converted_time)
-
-
-#merge
-
-
-
-
-
-
-
-
+#Store name,building, shipping_city, region
 
 """
 Codes:

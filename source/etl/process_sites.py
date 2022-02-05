@@ -6,7 +6,7 @@ import plotly.io as pio
 from plotly import graph_objs as go
 from shapely.geometry import LineString, MultiLineString
 
-from source.config.config import Config
+#from source.config.config import Config
 
 with open('data/processed/sites_with_geo_coding.pickle', 'rb') as input:
     geo_coded_sites = pickle.load(input)
