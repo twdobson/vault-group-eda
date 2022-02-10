@@ -28,14 +28,12 @@ if add_selectbox == "Individual Vault Wear & Tear Analysis":
     st.plotly_chart(figure,sharing = "streamlit")
 elif add_selectbox == "Average Vault Wear & Tear Analysis":
     st.header("Average Vault Wear & Tear Analysis")
-    cols = st.selectbox("Please select Vault Columns you'd like to investigate:",[6,5,4,3,2,1])
+    
+    config = st.selectbox("Please select Config Below",Controller.fetch_configurations())
 
-    arr = np.load(f'averages\\average_array_{cols}.npy')
-    fig = px.imshow(arr,text_auto=True,title=f"Average Utilisation of all units with {cols} columns")
+    average_plot, fig = Controller.fetch_average(config)
     st.plotly_chart(fig,sharing = "streamlit")
 
-    # plot = Controller.create_average_plot(unit_ids,data,cols)
-    # st.plotly_chart(plot,sharing = "streamlit")
 
 elif add_selectbox == "Vault Week/end Analysis":
     locations = data["store_name"].unique()
