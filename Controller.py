@@ -1,6 +1,8 @@
 
 from calendar import week
+from itertools import count
 from pickletools import string1
+from platform import mac_ver
 from xml.dom.domreg import well_known_implementations
 import pandas as pd
 import numpy as np
@@ -11,6 +13,7 @@ import urllib.parse
 import datetime
 from numpy import save
 from numpy import load
+import pickle
 
 
 #pd.options.display.max_rows = 500
@@ -19,7 +22,8 @@ pd.set_option("expand_frame_repr", True)
 pd.options.display.float_format = '{:.5f}'.format
 pd.set_option("max_colwidth", None)
 
-
+MAX_ROW_LENGTH = 9
+#determine how many columns are in each vault
 def num_cols(df):
     max_cols = 0
     for row in df['data']:
@@ -28,12 +32,27 @@ def num_cols(df):
             max_cols = slave_number
     return max_cols
 
+def max_row_calc(filtered_df):
+    max_rows = 0
+    for row in filtered_df["data"]:
+        
+        _, _, converted_end = final_convert(row)
+
+        last_row_end = np.where(converted_end == 2)
+
+        this_last_row = last_row_end[0][0]
+
+        if this_last_row > max_rows:
+            max_rows = this_last_row
+
+    return max_rows
+
 def convert_string(string):
     string_length = len(string)
     #Populates from the top
     if string_length == 9:
         #1 lockers
-        array_rep = np.zeros(shape = (9,1))
+        array_rep = np.zeros(shape = (MAX_ROW_LENGTH,1))
         l1 = string[4]
         array_rep[1] = 2
         array_rep[2] = 2
@@ -48,7 +67,7 @@ def convert_string(string):
             array_rep[0] = 1
     elif string_length == 11:
         #2 lockers
-        array_rep = np.zeros(shape = (9,1))
+        array_rep = np.zeros(shape = (MAX_ROW_LENGTH,1))
         l1 = string[4]
         l2 = string[6]
         array_rep[2] = 2
@@ -66,7 +85,7 @@ def convert_string(string):
             array_rep[1] = 1
     elif string_length == 13:
         #3 lockers
-        array_rep = np.zeros(shape = (9,1))
+        array_rep = np.zeros(shape = (MAX_ROW_LENGTH,1))
         l1 = string[4]
         l2 = string[6]
         l3 = string[8]
@@ -85,7 +104,7 @@ def convert_string(string):
             array_rep[2] = 1
     elif string_length == 15:
         #4 lockers
-        array_rep = np.zeros(shape = (9,1))
+        array_rep = np.zeros(shape = (MAX_ROW_LENGTH,1))
         l1 = string[4]
         l2 = string[6]
         l3 = string[8]
@@ -106,7 +125,7 @@ def convert_string(string):
             array_rep[3] = 1
     elif string_length == 17:
         #5 lockers
-        array_rep = np.zeros(shape = (9,1))
+        array_rep = np.zeros(shape = (MAX_ROW_LENGTH,1))
         l1 = string[4]
         l2 = string[6]
         l3 = string[8]
@@ -129,7 +148,7 @@ def convert_string(string):
             array_rep[4] = 1
     elif string_length == 19:
             #6 lockers
-            array_rep = np.zeros(shape = (9,1))
+            array_rep = np.zeros(shape = (MAX_ROW_LENGTH,1))
             l1 = string[4]
             l2 = string[6]
             l3 = string[8]
@@ -155,7 +174,7 @@ def convert_string(string):
                 array_rep[5] = 1
     elif string_length == 21:
             #7 lockers
-            array_rep = np.zeros(shape = (9,1))
+            array_rep = np.zeros(shape = (MAX_ROW_LENGTH,1))
             l1 = string[4]
             l2 = string[6]
             l3 = string[8]
@@ -183,7 +202,7 @@ def convert_string(string):
                 array_rep[6] = 1
     elif string_length == 23:
             #8 lockers
-            array_rep = np.zeros(shape = (9,1))
+            array_rep = np.zeros(shape = (MAX_ROW_LENGTH,1))
             l1 = string[4]
             l2 = string[6]
             l3 = string[8]
@@ -213,7 +232,7 @@ def convert_string(string):
                 array_rep[7] == 1
     elif string_length == 25:
             #9 lockers
-            array_rep = np.zeros(shape = (9,1))
+            array_rep = np.zeros(shape = (MAX_ROW_LENGTH,1))
             l1 = string[4]
             l2 = string[6]
             l3 = string[8]
@@ -263,114 +282,98 @@ def final_convert(row):
     return slave_number, converted_begin_state,converted_end_state
 
 def create_individual_plot(filtered_df,unit_id):
+    """
+    Basis method to compute cumulative utilisation across the provided time period.
+    
+    """
     max_cols = int(num_cols(filtered_df))
-    unit_array = np.zeros(shape = (9,max_cols+1))
-    cumulative_array = np.zeros(shape = (9,max_cols+1))
+    max_rows = max_row_calc(filtered_df)
+    cumulative_array = np.zeros(shape = (max_rows,max_cols+1))
 
     for row in filtered_df['data']:
-        slave_no, converted_beginning, converted_end = final_convert(row)
+        slave_no, converted_beginning, converted_end = final_convert(row) #outputs 9 rows at this point
         array_diffs = abs(converted_end - converted_beginning)
-        array_diffs = np.reshape(array_diffs,(9))
+        array_diffs = array_diffs[:max_rows]
+        array_diffs = np.reshape(array_diffs,(max_rows))
         cumulative_array[:,int(slave_no)] += array_diffs
-
-        unit_array[:,int(slave_no)] = np.reshape(converted_beginning,(9))
-        unit_array[:,int(slave_no)] = np.reshape(converted_end,(9))
-
     fig = px.imshow(cumulative_array,text_auto=True,title=f"Graph of Unit {unit_id} over December")
-
     return cumulative_array,fig
 
-def create_average_plot(unit_list,df,columns):
-    average_array = np.zeros(shape=(9,columns))
+def create_average_plot(unit_list,df,rows,columns):
+    """Used to comput averages in real-time
+
+        The concern here is that this script will take long time to run/inefficient. 
+        Added script below to compute all at once and then fetch.
+    
+    """
+    average_array = np.zeros(shape=(rows,columns))
     count = 0
     for unit in unit_list:
-        filtered_df = df[df["unit_id"] == str(unit)]
-        filtered_df = filtered_df[filtered_df['data'].str.contains("Locker state")]
+        try:
+            filtered_df = df[df["unit_id"] == str(unit)]
+            filtered_df = filtered_df[filtered_df['data'].str.contains("Locker state")]
+            usage_array, _ = create_individual_plot(filtered_df,unit)
 
-        usage_array, _ = create_individual_plot(filtered_df,unit)
-
-        if usage_array.shape[1] == columns:
-            average_array += usage_array
-            count +=1
+            if usage_array.shape == (rows,columns):
+                average_array += usage_array
+                count +=1
+        except:
+            print(f"Something went wrong when scanning unit {unit}")
+            pass
 
     average_array = average_array/count
-    fig = px.imshow(average_array,text_auto=True,title=f"Average Utilisation of all units with {columns} columns")
-    return fig
+    fig = px.imshow(average_array,text_auto=True,title=f"Average Utilisation of all units with {columns} columns and {rows} rows")
+    return average_array, fig
 
-def create_average_plot_all(unit_list,df):
-
-    average_array1 = np.zeros(shape=(9,1))
-    average_array2 = np.zeros(shape=(9,2))
-    average_array3 = np.zeros(shape=(9,3))
-    average_array4 = np.zeros(shape=(9,4))
-    average_array5 = np.zeros(shape=(9,5))
-    average_array6 = np.zeros(shape=(9,6))
-    average_array7 = np.zeros(shape=(9,7))
-    average_array8 = np.zeros(shape=(9,8))
-    average_array9 = np.zeros(shape=(9,9))
-
-    count1 = 0
-    count2 = 0
-    count3 = 0
-    count4 = 0
-    count5 = 0
-    count6 = 0
-    count7 = 0
-    count8 = 0
-    count9 = 0
-
+def create_average_plot_script(unit_list, raw_df):
+    """
+    Batch script used to loop through a day/week/month's logs and store the average across all available configs.
+    
+    """
+    matrix_dict = {}
+    count_dict = {}
     for unit in unit_list:
-        filtered_df = df[df["unit_id"] == str(unit)]
+        filtered_df = raw_df[raw_df["unit_id"] == str(unit)]
         filtered_df = filtered_df[filtered_df['data'].str.contains("Locker state")]
-        usage_array, _ = create_individual_plot(filtered_df,unit)
 
-        if usage_array.shape[1] == 1:
-            average_array1 += usage_array
-            count1 +=1
-        elif usage_array.shape[1] == 2:
-            average_array2 += usage_array
-            count2 +=1        
-        elif usage_array.shape[1] == 3:
-            average_array3 += usage_array
-            count3 +=1  
-        elif usage_array.shape[1] == 4:
-            average_array4 += usage_array
-            count4 +=1  
-        elif usage_array.shape[1] == 5:
-            average_array5 += usage_array
-            count5 +=1
-        elif usage_array.shape[1] == 6:
-            average_array6 += usage_array
-            count6 +=1
-        elif usage_array.shape[1] == 7:
-            average_array7 += usage_array
-            count7 +=1
-        elif usage_array.shape[1] == 8:
-            average_array8 += usage_array
-            count8 +=1
-        elif usage_array.shape[1] == 9:
-            average_array9 += usage_array
-            count9 +=1
-      
-    average_array1 = average_array1//count1
-    average_array2 = average_array2//count2
-    average_array3 = average_array3//count3
-    average_array4 = average_array4//count4
-    average_array5 = average_array5//count5
-    average_array6 = average_array6//count6
-    average_array7 = average_array7//count7
-    average_array8 = average_array8//count8
-    average_array9 = average_array9//count9
+        max_cols = int(num_cols(filtered_df))
+        max_rows = int(max_row_calc(filtered_df))
+        shape = (max_rows,max_cols+1)
+        shape = str(shape)
+        cum_array, _ = create_individual_plot(filtered_df,unit)
 
-    save("average_array_1.npy",average_array1)
-    save("average_array_2.npy",average_array2)
-    save("average_array_3.npy",average_array3)
-    save("average_array_4.npy",average_array4)
-    save("average_array_5.npy",average_array5)
-    save("average_array_6.npy",average_array6)
-    save("average_array_7.npy",average_array7)
-    save("average_array_8.npy",average_array8) #nan
-    save("average_array_9.npy",average_array9) #nan
+        if shape in matrix_dict.keys():
+            matrix_dict[shape] += cum_array
+            count_dict[shape] += 1
+        else:
+            matrix_dict[shape] = cum_array
+            count_dict[shape] = 1
+
+
+    average_dict = {}
+    for key in matrix_dict.keys():
+        average_dict[key] = matrix_dict[key]/count_dict[key]
+
+    with open("data\\processed\\ave_lookup_dict.pickle","wb") as file:
+        pickle.dump(average_dict,file)
+
+def fetch_configurations():
+    """
+    Used to fetch averages from above batch
+    
+    """
+    with open("data\\processed\\ave_lookup_dict.pickle","rb") as file:
+        average_dict = pickle.load(file)
+    return average_dict.keys()
+
+def fetch_average(shape):
+
+    with open("ave_lookup_dict.pickle","rb") as file:
+        average_dict = pickle.load(file)
+
+    fig = px.imshow(average_dict[shape], text_auto= True,title=f"Average Utilisation of all units with configuration: {shape}")
+
+    return average_dict[shape], fig
 
 def utilisation_by_week(filtered_df, unit):
     converted_time = pd.to_datetime(filtered_df["capture_time"])
@@ -400,20 +403,12 @@ def utilisation_by_week(filtered_df, unit):
     
     return pie_df
 
-# df  = pd.read_pickle("type_1_df_merged.pkl")
-# print(df[['store_name','building', 'shop_number', 'shipping_street', 'shipping_city', 'region']])
 
-#Store name,building, shipping_city, region
+data = pd.read_pickle("type_1_df_merged.pkl")
+unit_ids = data["unit_id"].unique()
 
-"""
-Codes:
-- 0: Unlocked
-- 1: Locked
-- 2: Unused locker 
+create_average_plot_script(unit_ids,data)
 
-Slaves start from 0!
-
-"""
-
-
+# filtered_df = data[data["unit_id"] == "cv730"]
+# filtered_df = filtered_df[filtered_df['data'].str.contains("Locker state")]
 
