@@ -1,20 +1,8 @@
 
-from calendar import week
-from itertools import count
-from pickletools import string1
-from platform import mac_ver
-from xml.dom.domreg import well_known_implementations
 import pandas as pd
 import numpy as np
 import plotly.express as px
-from plotly.offline import plot 
-import requests
-import urllib.parse
-import datetime
-from numpy import save
-from numpy import load
 import pickle
-
 
 #pd.options.display.max_rows = 500
 pd.set_option('display.max_rows', 500)
@@ -368,12 +356,21 @@ def fetch_configurations():
 
 def fetch_average(shape):
 
-    with open("ave_lookup_dict.pickle","rb") as file:
+    with open("data\\processed\\ave_lookup_dict.pickle","rb") as file:
         average_dict = pickle.load(file)
 
     fig = px.imshow(average_dict[shape], text_auto= True,title=f"Average Utilisation of all units with configuration: {shape}")
 
     return average_dict[shape], fig
+
+def fetch_date_range(raw_df):
+    raw_cap_time = raw_df["capture_time"]
+    converted_time = pd.to_datetime(raw_cap_time)
+    
+    start_time = converted_time.min()
+    end_time = converted_time.max()
+
+    return start_time, end_time
 
 def utilisation_by_week(filtered_df, unit):
     converted_time = pd.to_datetime(filtered_df["capture_time"])
@@ -382,33 +379,36 @@ def utilisation_by_week(filtered_df, unit):
     mapping_function = {0:"Monday",1:"Tuesday",2:"Wednesday",3:"Thursday",4:"Friday",5:"Saturday",6:"Sunday"}
 
     weekend_df = filtered_df[filtered_df["day_of_week"] >= 5]
-    weekend_array, weekend_fig = create_individual_plot(weekend_df,unit)
+    weekend_array, _ = create_individual_plot(weekend_df,unit)
     weekend_sum = np.sum(weekend_array)
-    weekend_df["day_of_week"].map(mapping_function)
+    weekend_df["day_of_week"] = weekend_df["day_of_week"].map(mapping_function)
     
     weekend_numbers = weekend_df["day_of_week"].value_counts()
-    weekend_numbers = pd.DataFrame(weekend_numbers)
-    print(weekend_numbers)
+    weekend_numbers = pd.DataFrame(weekend_numbers).reset_index()
 
     week_df = filtered_df[filtered_df["day_of_week"] < 5]
-    week_array, week_fig = create_individual_plot(week_df,unit)
+    week_array, _ = create_individual_plot(week_df,unit)
     week_sum = np.sum(week_array)
-    week_df["day_of_week"].map(mapping_function)
-
+    week_df["day_of_week"] = week_df["day_of_week"].map(mapping_function)
+    
     week_numbers = week_df["day_of_week"].value_counts()
-    week_numbers = pd.DataFrame(week_numbers)
-    print(week_numbers)
+    week_numbers = pd.DataFrame(week_numbers).reset_index()
+    
+    whole_df = week_numbers.append(weekend_numbers)
 
     pie_df = pd.DataFrame(data = [["Weekly Utilisation",week_sum],["Weekend Utilisation",weekend_sum]])
     
-    return pie_df
+    return pie_df, whole_df
 
+def compare_stores(filtered_df,options):
+    final_df = pd.DataFrame(columns=["Store","Count"])
+    for store in options:
+        slice = filtered_df[filtered_df["store_name"] == store]
+        array, _ = create_individual_plot(slice,store)
+        sum = np.sum(array)
+        length = len(final_df)
 
-data = pd.read_pickle("type_1_df_merged.pkl")
-unit_ids = data["unit_id"].unique()
+        final_df.loc[length] = [store,sum]
 
-create_average_plot_script(unit_ids,data)
-
-# filtered_df = data[data["unit_id"] == "cv730"]
-# filtered_df = filtered_df[filtered_df['data'].str.contains("Locker state")]
+    return final_df
 
