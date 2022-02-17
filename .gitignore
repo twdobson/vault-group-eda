@@ -1,10 +1,10 @@
 type_1_df.pkl
 type_1_df_merged.pkl
-type_1_df_merged.pkl
 type_2_df.pkl
 raw_logs.log
 cleaned_logs.txt
 dummy_logs.txt
+
 .idea
 __pycache__/
 .env

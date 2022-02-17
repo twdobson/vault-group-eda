@@ -9,7 +9,7 @@ pd.options.display.max_colwidth = 1000
 
 log_data = []
 print('reading in raw data')
-with open('data\\raw\\raw_logs.log', 'r') as read:
+with open('data/raw/raw_logs.log', 'r') as read:
     for line in read:
         evaluation = eval(line.replace('true', 'True'))
         log_data.append(evaluation)

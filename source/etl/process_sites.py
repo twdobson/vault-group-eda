@@ -82,7 +82,7 @@ site_list.to_pickle('data/processed/dataprocessed_site_data.pkl')
 """To merge the two"""
 data = pd.read_pickle("type_1_df.pkl")
 
-site_data = pd.read_pickle("data\processed\dataprocessed_site_data.pkl")
+site_data = pd.read_pickle("data/processed/dataprocessed_site_data.pkl")
 
 merged = pd.merge(data, site_data,on="unit_id")
 merged.to_pickle("type_1_df_merged.pkl")

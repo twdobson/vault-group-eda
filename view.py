@@ -8,7 +8,7 @@ from datetime import datetime
 st.title("Vault Intelligence Platform")
 st.header("Helping you make Data-Driven Decisions, swiftly")
 
-add_image = st.sidebar.image("data\\assets\\VG_Logo.jpg")
+#add_image = st.sidebar.image("data\\assets\\VG_Logo.jpg")
 option_list = ("Individual Vault Wear & Tear Analysis","Average Vault Wear & Tear Analysis","Individual Vault Time Analysis","Compare Vault Locations Across Time")
 add_selectbox = st.sidebar.selectbox("Please select a view:",option_list)
 
